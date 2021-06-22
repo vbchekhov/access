@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv=" content-type" content=" text/html;" />
+	<title>vmpauto</title>
+	<link rel="stylesheet" href=" https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+	<style>
+		.centerall {
+			height: 70vh;
+			padding: 0;
+			display: flex;
+			flex-wrap: nowrap;
+			justify-content: center;
+			align-items: center;
+		}
+	</style>
+
+</head>
+<body>
+	<div class="container">
+		<div class="columns">
+
+			<div class="column centerall">
+
+				<form action="/2fa/" method="POST">
+					<a href="/"><img style=" height: 80px;" src="https://smazka.ru/img/logo1.png" alt="ВМПАВТО" height="80"></a>
+					<div class="field">
+						<label class="label">Логин: </label>
+						<div class="control ">
+							<input class="input is-success" type="input" name="user" id="user"
+								placeholder="Введите Ваш логин" value="">
+
+						</div>
+						<p class="help is-success">Доменый логин</p>
+					</div>
+
+					<div class="field">
+						<label class="label">Доменный пароль: </label>
+						<div class="control ">
+							<input class="input is-success" type="password" name="password" id="password"
+								placeholder="Введите пароль" value="">
+
+						</div>
+						<p class="help is-success">Пароль входа на компьютер</p>
+					</div>
+
+					<div class="field is-grouped">
+						<div class="control">
+							<button type="submit" class="button is-link">Далее</button>
+						</div>
+						<div class="control">
+							<a class="button is-link is-light" href="/">Отмена</a>
+						</div>
+					</div>
+					<p class="help">Если Вы регистрировались ранее и потеряли<br> 
+						ключи для авторизации, то пройдите регистрацию до конца.<br>
+						В противном случаи Вы не сможите авторизоваца.<br> 
+						Будьте внимательны и следуйте инструкицям.<br> 
+						Удачи!
+					</p>
+				</form>
+				
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv=" content-type" content=" text/html;" />
+    <title>vmpauto</title>
+    <link rel="stylesheet" href=" https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+    <style>
+        .centerall {
+            height: 100vh;
+            padding: 50px;
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="columns">
+
+            <div class="column centerall">
+
+                <form action="/verify2fa/" method="POST">
+                    <a href="/"><img style=" height: 80px;" src="https://smazka.ru/img/logo1.png" alt="ВМПАВТО" height="80"></a>
+                    <label class="label is-large">Настройка одноразового пароля: </label>
+                    <label class="label is-medium">1. Скачайте приложение Google Authenticator</label>
+                    <div class="field is-grouped">
+                        <div class="media-content" style="justify-content: center; display: flex;">
+
+                            <a style="padding-right: 150px;"
+                                href="https://apps.apple.com/ru/app/google-authenticator/id388497605">
+                                <img style=" height: 60px;" src="/static/icons/brand-appstore.png">
+                            </a>
+                            <a
+                                href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=ru">
+                                <img style=" height: 60px;" src="/static/icons/brand-google-play.png">
+                            </a>
+                        </div>
+                    </div>
+
+                    <label class="label is-medium">2. Откройте Google Authenticator и нажмите + ввреху<br>Ввод
+                        вручную</label>
+                    <label class="label is-medium">3. Введите значения полей. (Нажмите на значение для
+                        копирования)</label>
+                    <label style="color: darkgreen;" class="label is-small">Аккаунт: <a class="js-account"
+                            href="">{{.AccountName}}</a> </label>
+                    <label style="color: darkgreen;" class="label is-small">Ключ: <a class="js-secret"
+                            href="">{{.AccountSecret}}</a> </label>
+
+                    <label class="label is-medium">Или просто нажмите на <a style="color: blue;"
+                            href="otpauth://totp/vmpauto.local:{{.AccountName}}?secret={{.AccountSecret}}&issuer=vmpauto.local">
+                            cсылку</a> </label>
+
+                    <label class="label is-medium">4. Нажмите галочку вверху для сохранения и введите код</label>
+
+                    <div class="field">
+                        <label class="label">Введите 6-значный код подтвержения из Google Authenticator </label>
+                        <div class="control ">
+                            <input class="input is-success" type="input" name="passcode" id="passcode"
+                                placeholder="6-значный код" value="">
+
+                        </div>
+                        <p class="help is-success">Код из Google Authenticator</p>
+                    </div>
+
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-link">Подтвердить</button>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var copyaccountB = document.querySelector('.js-account');
+        copyaccountB.addEventListener('click', function (event) {
+
+            var account = document.querySelector('.js-account');
+            var range = document.createRange();
+            range.selectNode(account);
+            window.getSelection().addRange(range);
+
+            var successful = document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+
+        });
+
+        var copysecretB = document.querySelector('.js-secret');
+        copysecretB.addEventListener('click', function (event) {
+
+            var secret = document.querySelector('.js-secret');
+            var range = document.createRange();
+            range.selectNode(secret);
+            window.getSelection().addRange(range);
+
+            var successful = document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+
+        });              
+    </script>
+
+
+</body>
+
+</html>
