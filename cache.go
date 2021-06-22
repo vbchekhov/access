@@ -143,6 +143,20 @@ func (c *Cache) Get(username string) (*Note, bool) {
 	return n, ok
 }
 
+func (c *Cache) GetBySecret(key string) (*Note, bool) {
+
+	c.Lock()
+	defer c.Unlock()
+
+	for _, note := range c.Storage {
+		if note.Secret == key {
+			return note, true
+		}
+	}
+
+	return &Note{}, false
+}
+
 // Read () прочитать кэш из файла
 func (c *Cache) Read() *Cache {
 
@@ -169,12 +183,12 @@ func (c *Cache) Save() *Cache {
 
 type CacheTable []CacheTableSting
 
-type CacheTableSting struct{
-	Num int
+type CacheTableSting struct {
+	Num       int
 	UserName  string
 	BasicAuth string
 	Secret    string
-	Sesions bool
+	Sesions   bool
 }
 
 func (n *Note) Active() bool {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"html/template"
 	"io/ioutil"
@@ -16,22 +17,7 @@ import (
 // на основании токена из кук и регистрации в cache.json
 func g(w http.ResponseWriter, r *http.Request) {
 
-	// проверка на токен в куках
-	username, err := r.Cookie("_token")
-	if err != nil {
-		logger.Printf("Error read cookie session token %v", err)
-		http.Redirect(w, r, "/", 302)
-		return
-	}
-
-	// проверяем токен
-	var token, ok = "", false
-
-	if token, ok = tokens.Get(username.Value); !ok {
-		logger.Printf("Token for user %s not found ", username.Value)
-		http.Redirect(w, r, "/", 302)
-		return
-	}
+	n := r.Context().Value("note").(*Note)
 
 	// параметры в запросе
 	params := mux.Vars(r)
@@ -45,14 +31,6 @@ func g(w http.ResponseWriter, r *http.Request) {
 	// собираем параметры запроса
 	if r.URL.RawQuery != "" {
 		p = "?" + r.URL.RawQuery
-	}
-
-	// делаем запрос на страницу под пользователем
-	var n *Note
-	if n, ok = cache.Get(token); !ok {
-		logger.Printf("Cache data for user %s not found ", username.Value)
-		http.Redirect(w, r, "/", 302)
-		return
 	}
 
 	// вызов api из 1С
@@ -73,22 +51,7 @@ func g(w http.ResponseWriter, r *http.Request) {
 // на основании токена из кук и регистрации в cache.json
 func master(w http.ResponseWriter, r *http.Request) {
 
-	// проверка на токен в куках
-	username, err := r.Cookie("_token")
-	if err != nil {
-		logger.Printf("Error read cookie session token %v", err)
-		http.Redirect(w, r, "/", 302)
-		return
-	}
-
-	// проверяем токен
-	var token, ok = "", false
-
-	if token, ok = tokens.Get(username.Value); !ok {
-		logger.Printf("Token for user %s not found ", username.Value)
-		http.Redirect(w, r, "/", 302)
-		return
-	}
+	n := r.Context().Value("note").(*Note)
 
 	// параметры в запросе
 	params := mux.Vars(r)
@@ -96,20 +59,14 @@ func master(w http.ResponseWriter, r *http.Request) {
 	// переменные для формирования урла
 	var url, p string
 	// парсим адрес
-	for _, v := range params {
-		url += "/" + v
+	for k, v := range params {
+		if strings.HasPrefix(k, "u") {
+			url += "/" + v
+		}
 	}
 	// собираем параметры запроса
 	if r.URL.RawQuery != "" {
 		p = "?" + r.URL.RawQuery
-	}
-
-	// делаем запрос на страницу под пользователем
-	var n *Note
-	if n, ok = cache.Get(token); !ok {
-		logger.Printf("Cache data for user %s not found ", username.Value)
-		http.Redirect(w, r, "/", 302)
-		return
 	}
 
 	// вызов api из 1С
@@ -219,6 +176,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 	// сохраним на целый месяц, что не забывали свои л
 	SetCookie(w, "_username", username, 30*24*time.Hour)
 
+	ctx := context.WithValue(r.Context(), "note", n)
+	r = r.WithContext(ctx)
+
 	// перенаправляем
 	http.Redirect(w, r, "/g/MainPage", 302)
 }
@@ -256,7 +216,7 @@ func static(w http.ResponseWriter, r *http.Request) {
 	w.Write(file)
 }
 
-// index () стартовая страница
+// admin () стартовая страница
 func admin(w http.ResponseWriter, r *http.Request) {
 
 	// заголовки
@@ -291,18 +251,13 @@ func admin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		next.ServeHTTP(w, r)
-	})
-}
-
 func main() {
 
 	logger.Printf("Listen and serve on port %s", config.Port)
 
 	router := mux.NewRouter()
 
+	router.Use(auth)
 	// router.HandleFunc("/admin", admin).Methods("GET")
 
 	// ручка парсера картинок
@@ -337,18 +292,18 @@ func main() {
 	router.HandleFunc("/g/{u1}/{u2}/{u3}/{u4}/{u5}", g).Methods("POST")
 
 	// ручки переадресации по GET
-	router.HandleFunc("/master/{u1}", master).Methods("GET")
-	router.HandleFunc("/master/{u1}/{u2}", master).Methods("GET")
-	router.HandleFunc("/master/{u1}/{u2}/{u3}", master).Methods("GET")
-	router.HandleFunc("/master/{u1}/{u2}/{u3}/{u4}", master).Methods("GET")
-	router.HandleFunc("/master/{u1}/{u2}/{u3}/{u4}/{u5}", master).Methods("GET")
+	router.HandleFunc("/master/{master_key}/{u1}", master).Methods("GET")
+	router.HandleFunc("/master/{master_key}/{u1}/{u2}", master).Methods("GET")
+	router.HandleFunc("/master/{master_key}/{u1}/{u2}/{u3}", master).Methods("GET")
+	router.HandleFunc("/master/{master_key}/{u1}/{u2}/{u3}/{u4}", master).Methods("GET")
+	router.HandleFunc("/master/{master_key}/{u1}/{u2}/{u3}/{u4}/{u5}", master).Methods("GET")
 
 	// ручки переадресации по POST
-	router.HandleFunc("/master/{u1}", master).Methods("POST")
-	router.HandleFunc("/master/{u1}/{u2}", master).Methods("POST")
-	router.HandleFunc("/master/{u1}/{u2}/{u3}", master).Methods("POST")
-	router.HandleFunc("/master/{u1}/{u2}/{u3}/{u4}", master).Methods("POST")
-	router.HandleFunc("/master/{u1}/{u2}/{u3}/{u4}/{u5}", master).Methods("POST")
+	router.HandleFunc("/master/{master_key}/{u1}", master).Methods("POST")
+	router.HandleFunc("/master/{master_key}/{u1}/{u2}", master).Methods("POST")
+	router.HandleFunc("/master/{master_key}/{u1}/{u2}/{u3}", master).Methods("POST")
+	router.HandleFunc("/master/{master_key}/{u1}/{u2}/{u3}/{u4}", master).Methods("POST")
+	router.HandleFunc("/master/{master_key}/{u1}/{u2}/{u3}/{u4}/{u5}", master).Methods("POST")
 
 	http.ListenAndServe(":"+config.Port, router)
 }

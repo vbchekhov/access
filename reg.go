@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/pquerna/otp/totp"
-	auth "gopkg.in/korylprince/go-ad-auth.v3"
+	authLD "gopkg.in/korylprince/go-ad-auth.v3"
 )
 
 // first () регистрация в нашем сервисе
@@ -47,11 +47,11 @@ func new2fa(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// настройки соединения с доменом
-	config := &auth.Config{
+	config := &authLD.Config{
 		Server:   "SAD.vmpauto.local",
 		Port:     389,
 		BaseDN:   "OU=Personal,OU=LOCAL,DC=vmpauto,DC=local",
-		Security: auth.SecurityNone,
+		Security: authLD.SecurityNone,
 	}
 
 	// собираем значения
@@ -59,7 +59,7 @@ func new2fa(w http.ResponseWriter, r *http.Request) {
 	username := strings.ToLower(r.FormValue("user"))
 	password := r.FormValue("password")
 
-	status, err := auth.Authenticate(config, username, password)
+	status, err := authLD.Authenticate(config, username, password)
 
 	if !status || err != nil {
 		// если ошибка
