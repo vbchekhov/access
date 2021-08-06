@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// MessagePage () страничка вывода простых сообщений
-func MessagePage(w http.ResponseWriter, message, href, button string) {
+// messagePage () страничка вывода простых сообщений
+func messagePage(w http.ResponseWriter, message, href, button string) {
 
 	// заголовки
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -19,14 +19,14 @@ func MessagePage(w http.ResponseWriter, message, href, button string) {
 		"Button":  button,
 	}
 	// парсим html
-	t, err := template.ParseFiles("static/message.html")
+	t, err := template.ParseFS(pages, "pages/embed/message.html")
 	if err != nil {
-		logger.Printf("Error parse static/message.html - %v ", err)
+		logger.Printf("Error parse pages/embed/message.html - %v ", err)
 	}
 	// выполняем
 	err = t.Execute(w, data)
 	if err != nil {
-		logger.Printf("Error execute static/message.html - %v ", err)
+		logger.Printf("Error execute pages/embed/message.html - %v ", err)
 	}
 }
 

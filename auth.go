@@ -13,7 +13,6 @@ type notAuth struct {
 
 var gHandler = regexp.MustCompile("^/g/*")
 var masterHandler = regexp.MustCompile("^/master/*")
-
 var notAuthPath = []notAuth{
 	{Mask: regexp.MustCompile("^/$")},
 	{Mask: regexp.MustCompile("/first/.*")},
@@ -23,6 +22,7 @@ var notAuthPath = []notAuth{
 	{Mask: regexp.MustCompile("/verify2fa/.*")},
 	{Mask: regexp.MustCompile("/manual2fa/.*")},
 	{Mask: regexp.MustCompile("/static/.*")},
+	{Mask: regexp.MustCompile("/exit/.*")},
 }
 
 func auth(next http.Handler) http.Handler {

@@ -100,7 +100,7 @@ func (t *Tokens) OpenConnects() {
 		}
 		// открываем соединение
 		login, password := note.EncodeBasicAuth()
-		note.conn = newHTTPService(config.Service1C, login, password)
+		note.conn = newHttpService(config.Service1C, login, password)
 	}
 }
 
