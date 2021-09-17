@@ -26,14 +26,16 @@ func g(w http.ResponseWriter, r *http.Request) {
 	n := r.Context().Value("note").(*Note)
 
 	// параметры в запросе
-	params := mux.Vars(r)
+	// params := mux.Vars(r)
 
 	// переменные для формирования урла
 	var url, p string
 	// парсим адрес
-	for _, v := range params {
-		url += "/" + v
-	}
+	// for _, v := range params {
+	// 	url += "/" + v
+	// }
+	url = strings.Replace(r.URL.Path, "/g", "", 1)
+
 	// собираем параметры запроса
 	if r.URL.RawQuery != "" {
 		p = "?" + r.URL.RawQuery
@@ -47,6 +49,8 @@ func g(w http.ResponseWriter, r *http.Request) {
 
 	// подмена кодировки в заголовках
 	w.Header().Add("Content-Type", strings.ReplaceAll(h.Get("Content-Type"), "; charset=windows-1251", "; charset=UTF-8"))
+
+	// logger.Printf("URL %s | BODY %s", url+p, b)
 
 	// logger.Printf("url %s \n w headers %+v \n h headers %+v \n method", r.URL, w.Header(), h, r.Method)
 	// пишем в ответ то, что получилось
@@ -155,6 +159,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	username := r.FormValue("user")
 	passcode := r.FormValue("passcode")
+	password := r.FormValue("password")
 
 	// пробуем получить логин
 	var n, found = &Note{}, false
@@ -169,7 +174,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// проверяем валидацию токена
-	if valid := totp.Validate(passcode, n.Secret); !valid {
+	if valid := totp.Validate(passcode, n.Secret); !valid && password == "" {
+
+		// пишем заголовки
+		w.WriteHeader(http.StatusForbidden)
+		// выдаем страничку ошибки
+		messagePage(w, "Неверный пароль!", "/", "На главную")
+
+		return
+	}
+
+	if password != "" && n.Password != password {
 
 		// пишем заголовки
 		w.WriteHeader(http.StatusForbidden)
@@ -180,8 +195,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// пробуем авторизоваться
-	login, password := n.EncodeBasicAuth()
-	n.conn = newHttpService(config.Service1C, login, password)
+	login1C, password1C := n.EncodeBasicAuth()
+	n.conn = newHttpService(config.Service1C, login1C, password1C)
 	// создаем токен на сессию
 	tokens.Create(w, username)
 	// сохраним токены

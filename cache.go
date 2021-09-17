@@ -19,6 +19,7 @@ var cache *Cache
 // Note запись
 type Note struct {
 	UserName  string
+	Password  string
 	BasicAuth string
 	Secret    string
 	Timestamp uint64
