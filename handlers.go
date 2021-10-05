@@ -42,19 +42,20 @@ func g(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// вызов api из 1С
-	h, b, err := n.conn.makeRequest(url+p, r.Method, r.Body, &r.Header)
+	response, body, err := n.conn.makeRequest(url+p, r.Method, r.Body, &r.Header)
 	if err != nil {
 		logger.Printf("Error make request %v", err)
 	}
 
 	// подмена кодировки в заголовках
-	w.Header().Add("Content-Type", strings.ReplaceAll(h.Get("Content-Type"), "; charset=windows-1251", "; charset=UTF-8"))
+	w.Header().Add("Content-Type", strings.ReplaceAll(response.Header.Get("Content-Type"), "; charset=windows-1251", "; charset=UTF-8"))
 
-	// logger.Printf("URL %s | BODY %s", url+p, b)
+	// logger.Printf("URL %s | BODY %s", url+p, body)
 
-	// logger.Printf("url %s \n w headers %+v \n h headers %+v \n method", r.URL, w.Header(), h, r.Method)
+	// logger.Printf("url %s \n w headers %+v \n response headers %+v \n method", r.URL, w.Header(), response, r.Method)
 	// пишем в ответ то, что получилось
-	w.Write(b)
+	w.WriteHeader(response.StatusCode)
+	w.Write(body)
 }
 
 // master () метод переадресации на сервис 1С под пользователем
@@ -83,16 +84,17 @@ func master(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// вызов api из 1С
-	h, b, err := n.conn.makeRequest(url+p, r.Method, r.Body, &r.Header)
+	response, body, err := n.conn.makeRequest(url+p, r.Method, r.Body, &r.Header)
 	if err != nil {
 		logger.Printf("Error make request %v", err)
 	}
 
 	// подмена кодировки в заголовках
-	w.Header().Add("Content-Type", strings.ReplaceAll(h.Get("Content-Type"), "; charset=windows-1251", "; charset=UTF-8"))
+	w.Header().Add("Content-Type", strings.ReplaceAll(response.Header.Get("Content-Type"), "; charset=windows-1251", "; charset=UTF-8"))
 
 	// пишем в ответ то, что получилось
-	w.Write(b)
+	w.WriteHeader(response.StatusCode)
+	w.Write(body)
 }
 
 /* Ручки авторизации на сервисе

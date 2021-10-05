@@ -31,7 +31,7 @@ func newHttpService(server, login, password string) *httpService {
 	}
 }
 
-func (api *httpService) makeRequest(point, method string, body io.ReadCloser, headers *http.Header) (http.Header, []byte, error) {
+func (api *httpService) makeRequest(point, method string, body io.ReadCloser, headers *http.Header) (*http.Response, []byte, error) {
 
 	// подмена заголовков и вызов rest api из 1С
 	req, _ := http.NewRequest(method, api.server+point, body)
@@ -42,25 +42,25 @@ func (api *httpService) makeRequest(point, method string, body io.ReadCloser, he
 
 	resp, err := api.client.Do(req)
 	if err != nil {
-		return req.Header, []byte{}, fmt.Errorf("error response to %s: %s", point, err)
+		return resp, []byte{}, fmt.Errorf("error response to %s: %s", point, err)
 	}
 
 	// чтение тела запроса и trim лишних байтов
 	rbody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return resp.Header, []byte{}, fmt.Errorf("error read all body: %s", err)
+		return resp, []byte{}, fmt.Errorf("error read all body: %s", err)
 	}
 	rbody = bytes.TrimPrefix(rbody, []byte("\xef\xbb\xbf"))
 
 	// перекодировка в utf-8
 	utfbody, err := charset.NewReader(bytes.NewReader(rbody), resp.Header.Get("Content-Type"))
 	if err != nil {
-		return resp.Header, []byte{}, fmt.Errorf("error read content: %s", err)
+		return resp, []byte{}, fmt.Errorf("error read content: %s", err)
 	}
 
 	defer resp.Body.Close()
 
 	reader, err := ioutil.ReadAll(utfbody)
 
-	return resp.Header, reader, err
+	return resp, reader, err
 }
